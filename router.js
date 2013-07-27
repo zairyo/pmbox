@@ -5,7 +5,10 @@ var router = {
 
   add: function(rule, handler){
     var originalRule = rule;
-    if(!(rule instanceof RegExp)){
+    if(rule instanceof RegExp){
+      // if the rule is a RegExp, leave out the surrounding '/'
+      rule = rule.toString().slice(1,-1);
+    } else{
       rule = 
           '^'
         + rule.toString()
@@ -19,7 +22,7 @@ var router = {
     }
     this.table[rule] = {};
     // match pattern like '<param1>' and initialize the keys
-    this.table[rule].params = originalRule.match(/<\w*>/g) || [];
+    this.table[rule].params = originalRule.toString().match(/<\w*>/g) || [];
     this.table[rule].handler = handler;
   },
 

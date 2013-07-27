@@ -10,6 +10,7 @@ function testRoute(path){
 }
 
 tester.add('/<param1>/<param2>/', ok);
+tester.add(/^\/abc$/, ok);
 tester.add('/', ok);
 
 vows.describe('router matches').addBatch({
@@ -22,12 +23,20 @@ vows.describe('router matches').addBatch({
   },
   '/a/b and /a/b/ and get params': function() {
     var result = [testRoute('/a/b'), testRoute('/a/b/')];
-    assert.equal(result[0].params.param1, 'a');
-    assert.equal(result[0].params.param2, 'b');
-    assert.equal(result[1].params.param1, 'a');
-    assert.equal(result[1].params.param2, 'b');
+    var table = {
+      '01': 'a',
+      '02': 'b',
+      '11': 'a',
+      '12': 'b'
+    };
+    for(var i in table){
+      assert.equal((result[i[0]].params)['param'+i[1]], table[i]);
+    }
   },
-  'not /a/b/c': function(){
+  'not /a/b/c': function() {
     assert.isFalse(testRoute('/a/b/c').matched, false);
+  },
+  '/abc': function() {
+    assert.isTrue(testRoute('/abc').matched, true);
   }
 }).export(module)
