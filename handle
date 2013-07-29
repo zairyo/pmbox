@@ -1,0 +1,52 @@
+var url , querystring , fs , mime , router;
+
+fs = require('fs');
+url = require('url');
+querystring = require('querystring');
+mime = require('./mime');
+router = require('./router')
+
+function getCookie() {
+  var cookie;
+	cookie={};
+	return cookie;
+}
+
+function Error(res){
+	res.statusCode = 404;
+}
+
+var preHandler = function(req , res) {
+	var cookies  , extention , eTag , req.path;
+    
+    req.path = url.parse(req.url).pathname;
+	cookies = querystring.parse(req.headers.cookie , ';');
+	extention = req.path.slice(req.path.indexOf('.') , -1);
+
+	fs.stat(req.path , function(err,stat) {
+		if (err) {return Error(res);}
+		
+		res.content_length = stat.size;
+		res.setHeader('Content-Length' , stat.size);
+			//	set Content-Length.
+		res.content_type = mime.type(extention);
+		res.setHeader('Content-Type' , res.content_type);
+			//	set Content-Type.
+		res.cookies = cookies==={} ? getCookie() : cookies;
+		for (var key in res.cookies) {
+			res.setHeader('Set-Cookie' , {key + '=' + res.cookies[key]});
+		}
+			//	set Cookie.
+		eTag = stat.size + Date.parse(stat.mtime);
+		res.setHeader('Etag' , eTag);
+		if (req.headers['if-none-match']===eTag) {
+			res.statusCode = 304;
+		}
+		else{
+			res.statusCode = 200;
+		}
+			//	Cache-Control by Etag.	And control the statuscode.
+	})
+}
+
+exports.preHandler = preHandler;
