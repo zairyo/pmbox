@@ -13,4 +13,4 @@ An online Pokemon battle game on web pages, under development.
 
 Use the `Vows` for unit testing:
 
-  vows test/*
+        vows test/*
